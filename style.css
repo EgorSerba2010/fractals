@@ -1,0 +1,126 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: monospace;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #75a;
+}
+
+
+#grid-container {
+  display: grid;
+  /* Создаем, например, 20 колонок равной ширины */
+  grid-template-columns: repeat(300, 1fr);
+  grid-template-rows: repeat(200, 1fr);
+  width: 900px;
+  height: 600px;
+  /* border: 1px solid #000; */
+}
+
+.square {
+  /* border: 0.1px solid #eee; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 2px;
+  background: #00000000;
+}
+
+input {
+  transform: scale(2);
+  margin: 10px 0;
+  width: 400px;
+}
+
+
+
+canvas {
+  background: #000;
+  cursor: crosshair;
+  margin-top: 100px;
+}
+
+#zoom-info, #screenshotBtn {
+  position: absolute;
+  top: 10px;
+  color: #fff;
+  font-size: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 4px;
+  left: 10px;
+}
+
+#zoom-info {
+  pointer-events: none;
+}
+
+#screenshotBtn {
+  top: 50px;
+  z-index: 1;
+  background: rgba(192, 160, 208, 0.9);
+  box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.5);
+  transition: 0.1s;
+
+  &:hover {
+    transform: scale(0.97);
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.fractals {
+  width: 90%;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 4vw;
+  color: #fff;
+  
+  & > * {
+    background: #59f;
+    width: 40%;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    border: solid #555 2px;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5);
+    transition: 0.1s;
+
+    &.active {
+      background: #48d;
+    }
+    &:hover {
+      transform: scale(0.99);
+    }
+  }
+}
+
+#animateBtn {
+  color: #fff;
+  background: #aae;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  font-size: 16px;
+  margin-top: 30px;
+  border-radius: 50%;
+  border: solid 10px #79f;
+  transform: scale(0.9);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.7);
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.5);
+
+  &.active {
+    transform: scale(1.1);
+  }
+}
