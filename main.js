@@ -226,44 +226,6 @@ $canvas.addEventListener('wheel', (e) => {
 }, {passive: false})
 
 
-// Функция для расчета расстояния между двумя пальцами
-function getDistance(touch1, touch2) {
-    return Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
-}
-
-$canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-        // Запоминаем начальное расстояние при касании
-        initialPinchDist = getDistance(e.touches[0], e.touches[1]);
-    }
-}, { passive: false });
-
-$canvas.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2 && initialPinchDist !== null) {
-        e.preventDefault(); // Запрещаем стандартный зум страницы браузером
-
-        const currentDist = getDistance(e.touches[0], e.touches[1]);
-        
-        // Считаем коэффициент изменения
-        const diff = currentDist / initialPinchDist;
-        
-        // Инвертируем: если пальцы раздвигаются (diff > 1), зум должен уменьшаться (приближение)
-        if (diff > 1.02) { // Небольшой порог чувствительности
-            zoom *= 0.95;
-            initialPinchDist = currentDist; // Обновляем дистанцию для плавности
-        } else if (diff < 0.98) {
-            zoom *= 1.05;
-            initialPinchDist = currentDist;
-        }
-
-        render();
-    }
-}, { passive: false });
-
-$canvas.addEventListener('touchend', () => {
-    initialPinchDist = null;
-    render();
-});
 
 let lastTouchX = 0;
 let lastTouchY = 0;
