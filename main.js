@@ -205,6 +205,7 @@ window.addEventListener('keydown', (e) => {
 // 7. ПОПЫТКА СДЕЛАТЬ ЗУМ КОЛЁСИКОМ:
 $canvas.addEventListener('wheel', (e) => {
     e.preventDefault()
+    console.log(e)
     
     const rect = $canvas.getBoundingClientRect()
     const mouseX = e.clientX - rect.left
@@ -256,6 +257,59 @@ $canvas.addEventListener('touchmove', (e) => {
         }
 
         render();
+    }
+}, { passive: false });
+
+$canvas.addEventListener('touchend', () => {
+    initialPinchDist = null;
+    render();
+});
+
+let lastTouchX = 0;
+let lastTouchY = 0;
+
+$canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        // Запоминаем точку начала касания для одного пальца
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+    } else if (e.touches.length === 2) {
+        // Логика Pinch-to-Zoom (уже была у нас)
+        initialPinchDist = getDistance(e.touches[0], e.touches[1]);
+    }
+}, { passive: false });
+
+$canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Полная блокировка скролла страницы
+
+    if (e.touches.length === 1) {
+        // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ (DRAG) ---
+        const touchX = e.touches[0].clientX;
+        const touchY = e.touches[0].clientY;
+
+        // Считаем разницу в пикселях
+        const dx = touchX - lastTouchX;
+        const dy = touchY - lastTouchY;
+
+        // Пересчитываем пиксели в координаты фрактала
+        offsetX -= (dx / $canvas.width) * 3 * zoom;
+        offsetY -= (dy / $canvas.height) * 2 * zoom;
+
+        lastTouchX = touchX;
+        lastTouchY = touchY;
+
+        render(); // Быстрая отрисовка при движении
+    } 
+    else if (e.touches.length === 2) {
+        // --- ЛОГИКА ЗУМА (PINCH) ---
+        const currentDist = getDistance(e.touches[0], e.touches[1]);
+        const diff = currentDist / initialPinchDist;
+
+        if (Math.abs(1 - diff) > 0.01) { // Порог чувствительности
+            zoom *= (diff > 1 ? 0.95 : 1.05);
+            initialPinchDist = currentDist;
+            render();
+        }
     }
 }, { passive: false });
 

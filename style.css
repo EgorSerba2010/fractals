@@ -46,6 +46,7 @@ canvas {
   background: #000;
   cursor: crosshair;
   margin-top: 100px;
+  touch-action: none;
 }
 
 #zoom-info, #screenshotBtn {
