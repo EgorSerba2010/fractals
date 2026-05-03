@@ -226,50 +226,48 @@ $canvas.addEventListener('wheel', (e) => {
 }, {passive: false})
 
 
-
-let lastTouchX = 0;
-let lastTouchY = 0;
+// Функция для расчета расстояния между двумя пальцами
+function getDistance(touch1, touch2) {
+    return Math.hypot(touch1.clientX - touch2.clientX, touch1.clientY - touch2.clientY);
+}
 
 $canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 1) {
-        // Запоминаем точку начала касания для одного пальца
-        lastTouchX = e.touches[0].clientX;
-        lastTouchY = e.touches[0].clientY;
-    } else if (e.touches.length === 2) {
-        // Логика Pinch-to-Zoom (уже была у нас)
+    if (e.touches.length === 2) {
+        // Запоминаем начальное расстояние при касании
         initialPinchDist = getDistance(e.touches[0], e.touches[1]);
     }
 }, { passive: false });
 
 $canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault(); // Полная блокировка скролла страницы
+    if (e.touches.length === 2 && initialPinchDist !== null) {
+        e.preventDefault();
 
-    if (e.touches.length === 1) {
-        // --- ЛОГИКА ПЕРЕМЕЩЕНИЯ (DRAG) ---
-        const touchX = e.touches[0].clientX;
-        const touchY = e.touches[0].clientY;
+        // 1. Находим центр между двумя пальцами в пикселях
+        const rect = $canvas.getBoundingClientRect();
+        const touch1 = e.touches[0];
+        const touch2 = e.touches[1];
+        
+        const midX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+        const midY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
 
-        // Считаем разницу в пикселях
-        const dx = touchX - lastTouchX;
-        const dy = touchY - lastTouchY;
+        // 2. Запоминаем "фрактальную" точку под этим центром ДО зума
+        const fractalX = ((midX / $canvas.width) * 3 - 2) * zoom + offsetX;
+        const fractalY = ((midY / $canvas.height) * 2 - 1) * zoom + offsetY;
 
-        // Пересчитываем пиксели в координаты фрактала
-        offsetX -= (dx / $canvas.width) * 3 * zoom;
-        offsetY -= (dy / $canvas.height) * 2 * zoom;
-
-        lastTouchX = touchX;
-        lastTouchY = touchY;
-
-        render(); // Быстрая отрисовка при движении
-    } 
-    else if (e.touches.length === 2) {
-        // --- ЛОГИКА ЗУМА (PINCH) ---
-        const currentDist = getDistance(e.touches[0], e.touches[1]);
+        const currentDist = getDistance(touch1, touch2);
         const diff = currentDist / initialPinchDist;
 
-        if (Math.abs(1 - diff) > 0.01) { // Порог чувствительности
-            zoom *= (diff > 1 ? 0.95 : 1.05);
+        // 3. Применяем зум
+        if (Math.abs(1 - diff) > 0.01) { // Если пальцы сдвинулись достаточно сильно
+            const zoomFactor = diff > 1 ? 0.95 : 1.05;
+            zoom *= zoomFactor;
             initialPinchDist = currentDist;
+
+            // 4. ГЛАВНОЕ: Корректируем смещение, чтобы точка под центром пальцев не уплыла
+            // Вычисляем, где эта точка оказалась бы при новом зуме, и компенсируем разницу
+            offsetX = fractalX - ((midX / $canvas.width) * 3 - 2) * zoom;
+            offsetY = fractalY - ((midY / $canvas.height) * 2 - 1) * zoom;
+            
             render();
         }
     }
